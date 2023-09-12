@@ -34,15 +34,13 @@ func GetCepHandler(w http.ResponseWriter, r *http.Request) {
 	cdnCh := make(chan *util.Response)
 	viacepCh := make(chan *util.Response)
 
-	go infra.GetCepFromCdn(cep, cdnCh)
+	go infra.GetCepFromBrasilApi(cep, cdnCh)
 	go infra.GetCepFromViaCep(cep, viacepCh)
 
 	for {
 		select {
 		case msg := <-cdnCh:
 			if msg.Error == true {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode("Falha ao buscar cep. Cep inválido")
 				return
 			}
 
@@ -56,8 +54,6 @@ func GetCepHandler(w http.ResponseWriter, r *http.Request) {
 
 		case msg := <-viacepCh:
 			if msg.Error == true {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode("Falha ao buscar cep. Cep inválido")
 				return
 			}
 

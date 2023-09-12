@@ -8,19 +8,17 @@ import (
 	"github.com/ItaloG/go-busca-cep-multithreading/util"
 )
 
-type CdnCEP struct {
-	Code       string `json:"code"`
-	State      string `json:"state"`
-	City       string `json:"city"`
-	District   string `json:"district"`
-	Address    string `json:"address"`
-	Status     int    `json:"status"`
-	Ok         bool   `json:"ok"`
-	StatusText string `json:"statusText"`
+type BrasilApi struct {
+	Cep          string `json:"cep"`
+	State        string `json:"state"`
+	City         string `json:"city"`
+	Neighborhood string `json:"neighborhood"`
+	Street       string `json:"street"`
+	Service      string `json:"service"`
 }
 
-func GetCepFromCdn(cep string, ch chan *util.Response) {
-	resp, err := http.Get("https://cdn.apicep.com/file/apicep/" + cep + ".json")
+func GetCepFromBrasilApi(cep string, ch chan *util.Response) {
+	resp, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
 	if err != nil {
 		ch <- &util.Response{From: "", Cep: "", State: "", City: "", District: "", Error: true}
 		return
@@ -37,19 +35,19 @@ func GetCepFromCdn(cep string, ch chan *util.Response) {
 		ch <- &util.Response{From: "", Cep: "", State: "", City: "", District: "", Error: true}
 		return
 	}
-	var c CdnCEP
-	err = json.Unmarshal(body, &c)
+	var b BrasilApi
+	err = json.Unmarshal(body, &b)
 	if err != nil {
 		ch <- &util.Response{From: "", Cep: "", State: "", City: "", District: "", Error: true}
 		return
 	}
 
 	ch <- &util.Response{
-		From:     "CDN",
-		Cep:      c.Code,
-		State:    c.State,
-		City:     c.Address,
-		District: c.District,
+		From:     "BrasilApi",
+		Cep:      b.Cep,
+		State:    b.State,
+		City:     b.City,
+		District: b.Neighborhood,
 		Error:    false,
 	}
 	return
